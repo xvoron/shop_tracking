@@ -2,6 +2,9 @@ from scipy.spatial import distance as dist
 from collections import OrderedDict
 import numpy as np
 from random import randint
+from client import ClientSocket
+from dataloader import DataFrame, load_xml_from_dir
+import config
 
 
 class TrackingObject:
@@ -124,8 +127,38 @@ class Tracker:
 
 class TrackingApp:
     def __init__(self):
-        pass
+        self.socket = ClientSocket(config.ip, config.port,
+                config.headersize)
+        self.tracker = Tracker()
+        self.data = None
+
+    def load_data(self, path):
+        xmls = load_xml_from_dir(path)
+        self.data = [DataFrame(xml) for xml in xmls]
+
+    def start_tracking(self):
+        self.connect()
+        self.load_data()
+
+        for data in self.data:
+            information = self.tracker.update(data.boxes)
+            data2send = {"info": information, "img": data.img}
+            self.send_data(data2send)
+        self.send_data("end")
+
+    def connect(self):
+        self.socket.connect2server()
+
+    def send_data(self, data):
+        if data != "end":
+            self.socket.send_data_header(data)
+        else:
+            self.socket.send_finish()
+
+    def exit(self):
+        self.socket.close_connection()
 
 
 if __name__ == "__main__":
-    pass
+    tracker = TrackingApp()
+

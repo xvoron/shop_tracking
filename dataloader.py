@@ -55,13 +55,6 @@ def load_xml_from_dir(path: str):
     xmls = sorted([file for file in glob.glob(path)])
     return xmls
 
-def show(img):
-    cv2.namedWindow("Tracking", cv2.WINDOW_NORMAL)
-    cv2.imshow("Tracking", img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-    return None
 
 
 if __name__ == "__main__":

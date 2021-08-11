@@ -23,6 +23,15 @@ def process_image(img, out):
 
     return img
 
+
+def show(img):
+    cv2.namedWindow("Tracking", cv2.WINDOW_NORMAL)
+    cv2.imshow("Tracking", img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    return None
+
 class VisualApp:
     def __init__(self):
         pass

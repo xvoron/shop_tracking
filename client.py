@@ -16,7 +16,6 @@ class ClientSocket:
         self.ip = ip
         self.port = port
         self.headersize = headersize
-        self.connect2server()
 
     def close_connection(self):
         self.sock.close()
@@ -58,5 +57,4 @@ if __name__ == "__main__":
     sock = ClientSocket(ip, port, headersize)
     sock.send_data_header(data)
     sock.send_finish()
-
 
