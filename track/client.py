@@ -5,12 +5,6 @@ import numpy as np
 import time
 
 
-class Data:
-    def __init__(self, ID, img):
-        self.ID = ID
-        self.img = img
-
-
 class ClientSocket:
     def __init__(self, ip, port, headersize):
         self.ip = ip
@@ -19,11 +13,13 @@ class ClientSocket:
 
     def close_connection(self):
         self.sock.close()
+        print("[Info] Socket was closed")
 
     def connect2server(self):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.ip, self.port))
+            print(f"[Info] Connected to server {self.ip}:{self.port}")
         except Exception as e:
             print(e)
 
@@ -32,8 +28,8 @@ class ClientSocket:
             data_send = pickle.dumps(data)
             data_send = bytes(f"{len(data_send):<{self.headersize}}", "utf-8") + data_send
             self.sock.sendall(data_send)
-            time.sleep(2)
-            print("Data send")
+            print(f"[Info] Data send: {len(data_send)}")
+            time.sleep(1)
         except Exception as e:
             print(e)
             self.sock.close()
@@ -44,17 +40,8 @@ class ClientSocket:
             self.sock.sendall(data_send)
             time.sleep(0.5)
             self.sock.close()
-            print("Finish sending")
+            print("[Info] Finish sending")
 
 
 if __name__ == "__main__":
-    img = cv2.imread("shop/youtube_shop0086.jpg")
-    data = Data(1, img)
-
-    ip = 'localhost'
-    port = 12002
-    headersize = 20
-    sock = ClientSocket(ip, port, headersize)
-    sock.send_data_header(data)
-    sock.send_finish()
-
+    pass

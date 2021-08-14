@@ -4,7 +4,16 @@ import numpy as np
 from random import randint
 from client import ClientSocket
 from dataloader import DataFrame, load_xml_from_dir
-import config
+import argparse
+import time
+from socket import gethostbyname
+
+
+IP = gethostbyname('shop_visual_container')
+PORT = 9999
+HEADERSIZE = 20
+DOCKER_PATH = '/usr/src/shopapp/data/'
+VIDEO_NAME = 'shop.avi'
 
 
 class TrackingObject:
@@ -126,17 +135,19 @@ class Tracker:
 
 
 class TrackingApp:
-    def __init__(self):
-        self.socket = ClientSocket(config.ip, config.port,
-                config.headersize)
+    def __init__(self, path=None):
+        self.socket = ClientSocket(IP, PORT, HEADERSIZE)
         self.tracker = Tracker()
         self.data = None
+        self.path = path if path != None else PATH
 
-    def load_data(self, path):
-        xmls = load_xml_from_dir(path)
-        self.data = [DataFrame(xml) for xml in xmls]
 
-    def start_tracking(self):
+    def load_data(self):
+        xmls = load_xml_from_dir(self.path + "*.xml")
+        self.data = [DataFrame(xml, self.path) for xml in xmls]
+
+    def start(self):
+        time.sleep(2)
         self.connect()
         self.load_data()
 
@@ -145,6 +156,7 @@ class TrackingApp:
             data2send = {"info": information, "img": data.img}
             self.send_data(data2send)
         self.send_data("end")
+        self.exit()
 
     def connect(self):
         self.socket.connect2server()
@@ -160,5 +172,19 @@ class TrackingApp:
 
 
 if __name__ == "__main__":
-    tracker = TrackingApp()
+
+    parser_help = "Running tracking application in docker using path \
+                   to files argument."
+    parser = argparse.ArgumentParser(description=parser_help)
+    path_help = "Path to files with *.xml and *.jpg extension"
+    parser.add_argument("-p", "--path", help=path_help)
+    args = parser.parse_args()
+
+    if args.path:
+        path = args.path
+    else:
+        path = DOCKER_PATH
+
+    tracker = TrackingApp(path)
+    tracker.start()
 

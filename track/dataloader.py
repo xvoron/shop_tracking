@@ -3,8 +3,6 @@ import glob
 import os
 import xml.etree.ElementTree as ET
 import time
-from visual import process_image
-from track import Tracker
 import numpy as np
 
 class DataFrame:
@@ -13,9 +11,9 @@ class DataFrame:
     Encapsulate data about image and bounding boxes.
     """
 
-    def __init__(self, xml):
+    def __init__(self, xml, path:str):
         self.img_name, self.boxes = self._extract_info(xml)
-        self.img = self._load_image("shop/")
+        self.img = self._load_image(path)
 
     def _extract_info(self, xml):
         tree = ET.parse(xml)
@@ -60,17 +58,3 @@ def load_xml_from_dir(path: str):
 if __name__ == "__main__":
     path_xml = 'shop/*.xml'
     xmls = load_xml_from_dir(path_xml)
-
-    data = [DataFrame(xml) for xml in xmls]
-    tracker = Tracker()
-
-    for d in data:
-        out = tracker.update(d.boxes)
-        img = process_image(d.img, out)
-
-        cv2.imshow("Tracking", d.img)
-        if cv2.waitKey(25) & 0xFF == ord('q'):
-            break
-        time.sleep(0.3)
-
-    cv2.destroyAllWindows()
