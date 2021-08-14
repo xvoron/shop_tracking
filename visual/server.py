@@ -3,13 +3,6 @@ import pickle
 import cv2
 import time
 
-
-class Data:
-    def __init__(self, ID, img):
-        self.ID = ID
-        self.img = img
-
-
 class ServerSocket:
     def __init__(self, ip, port, headersize):
         self.ip = ip

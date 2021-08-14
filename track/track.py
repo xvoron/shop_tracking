@@ -1,3 +1,20 @@
+"""Tracking component
+
+Description:
+    TrackingApp managing loading xml data and image, apply tracking
+    algorithm [1] to a frame. After frame was processed send image and data
+    about tracking object (TrackingObject class) to Visualization Component
+    in different docker container. After all data send close the socket and
+    finish process.
+
+
+[1] Tracking algorithm (Tracker class):
+    Simply algorithm based on euclidean distance between centroids
+    calculated from bounding boxes. If there is a new object tracker
+    register that object with a new ID number. If some of the objects does
+    not appear anymore tracker deregister particular object.
+
+"""
 from scipy.spatial import distance as dist
 from collections import OrderedDict
 import numpy as np
@@ -6,17 +23,23 @@ from client import ClientSocket
 from dataloader import DataFrame, load_xml_from_dir
 import argparse
 import time
-from socket import gethostbyname
+import socket
 
+# Config constants
+try:
+    IP = socket.gethostbyname('shop_visual_container')  # Docker usage
+except:
+    IP = 'localhost'    # For testing purposes 'localhost'.
 
-IP = gethostbyname('shop_visual_container')
 PORT = 9999
 HEADERSIZE = 20
+PATH = '~/projects/shop_tracker/shop/'
 DOCKER_PATH = '/usr/src/shopapp/data/'
-VIDEO_NAME = 'shop.avi'
 
 
 class TrackingObject:
+    """Contain all necessary information about tracking object"""
+
     def __init__(self, box, centroid):
         self.ID = None
         self.color = None
@@ -25,6 +48,7 @@ class TrackingObject:
         self.centroids = [self.centroid]
 
     def update(self, box, centroid):
+        """Tracker updates data by this method"""
         self.box = box
         self.centroid = centroid
 
@@ -34,19 +58,34 @@ class TrackingObject:
 
 
 class Tracker:
+    """Simply algorithm based on euclidean distance between centroids
+    calculated from bounding boxes.
+    """
     def __init__(self):
-        self.max_num_id = 10
+        # maximum number of objects at one frame
+        self.max_num_id = 100
         self.next_id = 0
+        # storage for all TrackingObject's
         self.objects = OrderedDict()
 
+        # objects that will disappear if they not captured again
         self.disappeared = OrderedDict()
+        # maximum frames for disappear
         self.max_disapper = 10
 
-        self.max_objects = 10
+        # number of stored objects (memory)
+        self.max_objects = 100
         self.tracking_objects = [None] * self.max_objects
         self.Object = TrackingObject
 
     def register(self, obj):
+        """Register object with given ID, add a random color
+
+        Args:
+
+        Returns:
+
+        """
         self.objects[self.next_id] = obj
         self.objects[self.next_id].ID = self.next_id
         self.objects[self.next_id].color = (randint(0, 255), randint(0,
