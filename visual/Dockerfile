@@ -8,4 +8,6 @@ WORKDIR /usr/src/shopapp/
 RUN mkdir -p /usr/src/shopapp/data/
 COPY . .
 EXPOSE 9999
+#RUN usermod -u 1000 /usr/src/shopapp/data/shop_tracking_video.avi
+#RUN usermod -G staff /usr/src/shopapp/data/shop_tracking_video.avi
 ENTRYPOINT ["python3", "visual.py"]
