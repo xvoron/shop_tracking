@@ -16,27 +16,35 @@ enter commands line-by-line.
 
 Build docker images of Visual and Tracking components; create a virtual
 network to provide communication between them:
+
 ```bash
 docker image build -t shop:visual visual/   # Build Visual component image
-docker image build -t shop:track track/     # Build Tracking component image
+```
 
+```bash
+docker image build -t shop:track track/     # Build Tracking component image
+```
+
+```bash
 docker network create shopnet   # Create a network to communication
 ```
 
-Run images in the separate terminals; change **<~/path/to/data>**:
+Run images in the separate terminals; change **<~/path/to/data>**.
+
+Terminal 1:
 ```bash
-# terminal 1
 docker run --network=shopnet -v <~/path/to/data>:/usr/src/shopapp/data/ --rm --name \
     shop_visual_container --user $(id -u):$(id -g) -it shop:visual
-
-# terminal 2
+```
+Terminal 2:
+```bash
 docker run --network=shopnet -v <~/path/to/data>:/usr/src/shopapp/data/ --rm --name \
     shop_track_container --user $(id -u):$(id -g) -it shop:track
 ```
 
 # Output
 Output video file `shop_tracking_video.avi` is saved in
-**<~/path/to/files/>**.
+**<~/path/to/data/>**.
 
 # Troubleshooting
 ## root privileges of output video file
