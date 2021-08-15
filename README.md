@@ -2,10 +2,10 @@
 
 # Install
 Install docker form official repository:
-- https://docs.docker.com/get-docker/
+- [Docker get started](https://docs.docker.com/get-docker/)
     
-    Make sure that post install steps was done: 
-    https://docs.docker.com/engine/install/linux-postinstall/
+> Make sure that post install steps was done: 
+> [Post installation](https://docs.docker.com/engine/install/linux-postinstall/)
 
 # Run
 There are two options to run application using script `run.sh` or manually
@@ -15,7 +15,7 @@ enter commands line-by-line.
 ```bash
 ./run.sh ~/path/to/files/
 ```
-    VisualApp (Server side) is detached using `docker run -d`
+> VisualApp (Server side) is detached using `docker run -d`
     
 ## Manually
 
