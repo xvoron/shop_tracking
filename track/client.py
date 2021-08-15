@@ -6,7 +6,16 @@ import time
 
 
 class ClientSocket:
-    def __init__(self, ip, port, headersize):
+    """ClientSocket manage connecting to server and send python objects
+       using pickle library. 
+
+    Attributes:
+        ip (str): Server IP address.
+        port (int): Port to connect.
+        headersize (int): Size of header, contain information about data
+                          length, if all data send, contain -1.
+    """
+    def __init__(self, ip:str, port:int, headersize:int):
         self.ip = ip
         self.port = port
         self.headersize = headersize
@@ -25,7 +34,9 @@ class ClientSocket:
 
     def send_data_header(self, data):
         try:
+            # pickle library to send python object
             data_send = pickle.dumps(data)
+            # append header to sending data
             data_send = bytes(f"{len(data_send):<{self.headersize}}", "utf-8") + data_send
             self.sock.sendall(data_send)
             print(f"[Info] Data send: {len(data_send)}")
@@ -40,8 +51,4 @@ class ClientSocket:
             self.sock.sendall(data_send)
             time.sleep(0.5)
             self.sock.close()
-            print("[Info] Finish sending")
-
-
-if __name__ == "__main__":
-    pass
+            print("[Info] Finish sending, close socket")

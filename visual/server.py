@@ -4,13 +4,23 @@ import cv2
 import time
 
 class ServerSocket:
+    """Open server socket to receive data form tracking component.
+
+    Note:
+        Using pickle library to decode received data as python objects.
+
+    Attributes:
+        ip (str): Server IP address.
+        port (int): Port to connect.
+        headersize (int): Size of header, contain information about data
+                          length, if all data send, contain -1.
+    """
     def __init__(self, ip, port, headersize):
         self.ip = ip
         self.port = port
         self.headersize = headersize
         self.buffersize = 4096
         self.queuesize = 10
-        self.open_socket()
 
     def open_socket(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,6 +46,9 @@ class ServerSocket:
             self.open_socket()
 
     def recvall_header(self):
+        """Handler receive all data including message header using
+        temporary buffer
+        """
         buf = b''
         new_msg = True
         data = None
@@ -46,7 +59,7 @@ class ServerSocket:
             if new_msg and msg != b'':
                 header = msg[:self.headersize]
 
-                if int(header) == -1:
+                if int(header) == -1:   # end of data stream
                     print("End message")
                     return -1
 
@@ -57,25 +70,9 @@ class ServerSocket:
             buf += msg
 
             if len(buf) - self.headersize == msg_len:
-                print("Buffer received")
                 data = pickle.loads(buf[self.headersize:])
                 new_msg = True
                 buf = b''
                 break
 
         return data
-
-
-
-if __name__ == "__main__":
-    ip = 'localhost'
-    port = 12002
-    headersize = 20
-    sock = ServerSocket(ip, port, headersize)
-    while True:
-        data = sock.receive_data()
-        if data == -1:
-            sock.close_socket()
-            break
-        else:
-            cv2.imwrite("test.jpg", data.img)

@@ -1,9 +1,11 @@
+"""Handler functions and class to manage data """
 import cv2
 import glob
 import os
 import xml.etree.ElementTree as ET
 import time
 import numpy as np
+
 
 class DataFrame:
     """DataFrame class
@@ -46,13 +48,14 @@ class DataFrame:
 
 
 def load_images_from_dir(path):
+    """Load images from the path to list"""
     imgs = [{'img':cv2.imread(file), 'filename': str(file)} for file in glob.glob(path)]
     return imgs
 
 def load_xml_from_dir(path: str):
+    """Load sorted xml files to list"""
     xmls = sorted([file for file in glob.glob(path)])
     return xmls
-
 
 
 if __name__ == "__main__":

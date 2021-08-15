@@ -33,8 +33,8 @@ except:
 
 PORT = 9999
 HEADERSIZE = 20
-PATH = '~/projects/shop_tracker/shop/'
-DOCKER_PATH = '/usr/src/shopapp/data/'
+PATH = '~/projects/shop_tracker/shop/'  # default path to data
+DOCKER_PATH = '/usr/src/shopapp/data/'  # docker mounted volume
 
 
 class TrackingObject:
@@ -79,13 +79,7 @@ class Tracker:
         self.Object = TrackingObject
 
     def register(self, obj):
-        """Register object with given ID, add a random color
-
-        Args:
-
-        Returns:
-
-        """
+        """Register object with given ID, add a random color"""
         self.objects[self.next_id] = obj
         self.objects[self.next_id].ID = self.next_id
         self.objects[self.next_id].color = (randint(0, 255), randint(0,
@@ -94,10 +88,22 @@ class Tracker:
         self.next_id += 1
 
     def deregister(self, obj_id):
+        """Derigister object after disappear from frame"""
         del self.objects[obj_id]
         del self.disappeared[obj_id]
 
     def update(self, data):
+        """Update tracking information for each frame
+
+
+        Args:
+            data (list): Represented by list of bounding boxes
+
+        Return:
+            self.objects (OrderedDictionary): Contain TrackingObject's
+                instances with whole information about objects tracking on
+                a frame.
+        """
         # If there is nothing to update, deregister objects that do not
         # appear in self.max_dissapper number of frames
         if len(data) == 0:
@@ -109,7 +115,7 @@ class Tracker:
 
             return self.objects
 
-        # reserve memory for input centroids
+        # reserve memory for input centroids calculated from input data bounding boxes
         input_centroids = np.zeros((len(data), 2), dtype="int")
 
         for (i, box) in enumerate(data):
@@ -129,6 +135,7 @@ class Tracker:
             for obj in list(self.objects.values()):
                 objects_centroids.append(obj.centroid)
 
+            # calculate distance between current and new centroids
             D = dist.cdist(np.array(objects_centroids), input_centroids)
 
             rows = D.min(axis=1).argsort()
@@ -174,6 +181,21 @@ class Tracker:
 
 
 class TrackingApp:
+    """Manage tracking component
+
+    Description:
+        1. Open socket to communicate with visual component
+        2. Iteratively:
+            2.1 load xml and image data.
+            2.2 apply tracking algorithm.
+            2.3 send frame TrackingObject's and image to visual component
+                via socket.
+        3. After tracking applying and send all data, close socket, and
+           stop program.
+
+    Attributes:
+        path (str): path to xml and image data
+    """
     def __init__(self, path=None):
         self.socket = ClientSocket(IP, PORT, HEADERSIZE)
         self.tracker = Tracker()
@@ -186,7 +208,7 @@ class TrackingApp:
         self.data = [DataFrame(xml, self.path) for xml in xmls]
 
     def start(self):
-        time.sleep(2)
+        time.sleep(1)
         self.connect()
         self.load_data()
 
